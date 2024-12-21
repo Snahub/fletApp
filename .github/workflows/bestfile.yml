@@ -1,0 +1,78 @@
+name: Deploy Flet Web App to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:  # Allows manual triggering of the workflow
+
+env:
+  PYTHON_VERSION: "3.12"         # Python version to use
+  FLUTTER_VERSION: "3.24.0"      # Flutter version compatible with Flet
+  BUILD_DIR: "build/web"         # Flet build output directory
+
+jobs:
+  build:
+    name: Build Flet Web App
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the Code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Setup Python Environment
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      # Step 3: Install Python Dependencies
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flet
+
+      # Step 4: Setup Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      # Step 5: Build Flet Web App
+      - name: Build Flet Web App
+        run: |
+          echo "Building the Flet Web App..."
+          flet build web --base-url /${{ github.event.repository.name }} --route-url-strategy hash
+
+      # Step 6: Upload Build Artifact
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.BUILD_DIR }}
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build  # Ensures build job completes successfully before deploying
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # Step 1: Setup GitHub Pages
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      # Step 2: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages
