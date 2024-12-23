@@ -9,7 +9,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.12"  
-  FLUTTER_VERSION: "3.22.2"
+  FLUTTER_VERSION: "3.24.0"
   BUILD_DIR: "build/web"
 
 jobs:
