@@ -44,7 +44,7 @@ jobs:
       - name: Build Flet Web App
         run: |
           echo "Building the Flet Web App..."
-          flet build web --base-url /${{ github.event.repository.name }} --route-url-strategy hash
+           flet build web --base-url /fletApp --route-url-strategy hash --module-name main
 
       # Step 6: Upload Build Artifact
       - name: Upload Artifact
